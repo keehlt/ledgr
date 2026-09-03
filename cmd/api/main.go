@@ -33,6 +33,7 @@ func main() {
 func createTransactions(c *gin.Context) {
 	var transactionReq Transaction
 
+	//unable to bind
 	if err := c.ShouldBindJSON(&transactionReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -40,9 +41,18 @@ func createTransactions(c *gin.Context) {
 		return
 	}
 
+	//check invalid transaction
+	if !validateTransactions(transactionReq) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid transaction",
+		})
+		return
+	}
+
 	//call storeTransactions function to store the transaction in slice
 	storeTransactions(transactionReq)
 
+	//valid transaction binding
 	c.JSON(http.StatusOK, gin.H{
 		"message":     "data converted to struct successfully",
 		"transaction": transactionReq,
@@ -59,4 +69,23 @@ func getTransactions(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"transactions": transactions,
 	})
+}
+
+// validate the transaction
+func validateTransactions(transactionReq Transaction) bool {
+	if transactionReq.Amount <= 0 {
+		return false
+	} else if transactionReq.UserID == "" {
+		return false
+	} else if transactionReq.TransactionID == "" {
+		return false
+	} else if transactionReq.Currency == "" {
+		return false
+	} else if transactionReq.IPAddress == "" {
+		return false
+	} else if transactionReq.TimeStamp <= 0 {
+		return false
+	} else {
+		return true
+	}
 }
