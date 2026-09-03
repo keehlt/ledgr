@@ -6,13 +6,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// store in slice
+var transactions []Transaction
+
 // creating struct
 type Transaction struct {
 	TransactionID string `json:"transaction_id"`
 	UserID        string `json:"user_id"`
 	Amount        int64  `json:"amt"`
 	Currency      string `json:"currency"`
-	IPAddress     string `json:"ip"`
+	IPAddress     string `json:"ip_address"`
 	TimeStamp     int64  `json:"timestamp"`
 }
 
@@ -36,8 +39,16 @@ func getTransactions(c *gin.Context) {
 		return
 	}
 
+	//call storeTransactions function to store the transaction in slice
+	storeTransactions(transactionReq)
+
 	c.JSON(http.StatusOK, gin.H{
 		"message":     "data converted to struct successfully",
 		"transaction": transactionReq,
 	})
+}
+
+// store the transaction in slice
+func storeTransactions(transactionReq Transaction) {
+	transactions = append(transactions, transactionReq)
 }
