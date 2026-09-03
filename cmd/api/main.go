@@ -7,7 +7,7 @@ import (
 )
 
 // store in slice
-var transactions []Transaction
+var transactions []Transaction = make([]Transaction, 0)
 
 // creating struct
 type Transaction struct {
@@ -23,13 +23,14 @@ type Transaction struct {
 func main() {
 	router := gin.Default()
 
-	router.POST("/transactions", getTransactions)
+	router.POST("/transactions", createTransactions)
+	router.GET("/transactions", getTransactions)
 
 	router.Run(":8080")
 }
 
 // retrieve json data and convert to struct
-func getTransactions(c *gin.Context) {
+func createTransactions(c *gin.Context) {
 	var transactionReq Transaction
 
 	if err := c.ShouldBindJSON(&transactionReq); err != nil {
@@ -51,4 +52,11 @@ func getTransactions(c *gin.Context) {
 // store the transaction in slice
 func storeTransactions(transactionReq Transaction) {
 	transactions = append(transactions, transactionReq)
+}
+
+// retrieve the stored transactions
+func getTransactions(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"transactions": transactions,
+	})
 }
