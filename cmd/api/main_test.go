@@ -1,9 +1,15 @@
 package main
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"strings"
 	"testing"
+
+	"github.com/gin-gonic/gin"
 )
 
+// test validateTransactions()
 func TestValidateTransactions(t *testing.T) {
 
 	tests := []struct {
@@ -70,5 +76,59 @@ func TestValidateTransactions(t *testing.T) {
 			}
 		})
 
+	}
+}
+
+// valid json
+func TestCreateValidTransaction(t *testing.T) {
+	router := gin.Default()
+	router.POST("/transactions", createTransactions)
+
+	request := httptest.NewRequest(
+		http.MethodPost,
+		"/transactions",
+		strings.NewReader(`{"transaction_id":"tx-test","user_id":"user-test","amt":5000,"currency":"INR","ip_address":"127.0.0.1","timestamp":1756940333}`),
+	)
+	response := httptest.NewRecorder()
+	router.ServeHTTP(response, request)
+	if response.Result().StatusCode != http.StatusOK {
+		t.Errorf("expected status %d, got %d", http.StatusOK, response.Result().StatusCode)
+	}
+}
+
+// valid JSON, invalid transaction
+func TestCreateInvalidTransaction(t *testing.T) {
+	router := gin.Default()
+	router.POST("/transactions", createTransactions)
+
+	request := httptest.NewRequest(
+		http.MethodPost,
+		"/transactions",
+		strings.NewReader(`{"transaction_id":"tx-test","user_id":"user-test","amt":-5000,"currency":"INR","ip_address":"127.0.0.1","timestamp":1756940333}`),
+	)
+	response := httptest.NewRecorder()
+	router.ServeHTTP(response, request)
+
+	if response.Result().StatusCode != http.StatusBadRequest {
+		t.Errorf("expected status %d, got %d", http.StatusBadRequest, response.Result().StatusCode)
+	}
+
+}
+
+// malformed JSON
+func TestCreateInvalidJSON(t *testing.T) {
+	router := gin.Default()
+	router.POST("/transactions", createTransactions)
+
+	request := httptest.NewRequest(
+		http.MethodPost,
+		"/transactions",
+		strings.NewReader(`{"transaction_id":,"user_id":"user-test","amt":-5000,"currency":"INR","ip_address":"127.0.0.1","timestamp":1756940333}`),
+	)
+	response := httptest.NewRecorder()
+	router.ServeHTTP(response, request)
+
+	if response.Result().StatusCode != http.StatusBadRequest {
+		t.Errorf("expected status %d, got %d", http.StatusBadRequest, response.Result().StatusCode)
 	}
 }
