@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ledgr/internal/transaction"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -11,16 +12,15 @@ import (
 
 // test validateTransactions()
 func TestValidateTransactions(t *testing.T) {
-	transactions = make([]Transaction, 0)
 
 	tests := []struct {
 		name        string
-		transaction Transaction
+		transaction transaction.Transaction
 		expected    bool
 	}{
 		{
 			name: "valid transaction",
-			transaction: Transaction{
+			transaction: transaction.Transaction{
 				TransactionID: "tx001",
 				UserID:        "user001",
 				Amount:        5000,
@@ -32,7 +32,7 @@ func TestValidateTransactions(t *testing.T) {
 		},
 		{
 			name: "negative amount",
-			transaction: Transaction{
+			transaction: transaction.Transaction{
 				TransactionID: "tx002",
 				UserID:        "user002",
 				Amount:        -5000,
@@ -44,7 +44,7 @@ func TestValidateTransactions(t *testing.T) {
 		},
 		{
 			name: "empty transaction id",
-			transaction: Transaction{
+			transaction: transaction.Transaction{
 				TransactionID: "",
 				UserID:        "user003",
 				Amount:        5000,
@@ -56,7 +56,7 @@ func TestValidateTransactions(t *testing.T) {
 		},
 		{
 			name: "empty user id",
-			transaction: Transaction{
+			transaction: transaction.Transaction{
 				TransactionID: "tx004",
 				UserID:        "",
 				Amount:        5000,
@@ -82,7 +82,6 @@ func TestValidateTransactions(t *testing.T) {
 
 // valid json
 func TestCreateValidTransaction(t *testing.T) {
-	transactions = make([]Transaction, 0)
 	router := gin.Default()
 	router.POST("/transactions", createTransactions)
 
@@ -100,7 +99,6 @@ func TestCreateValidTransaction(t *testing.T) {
 
 // valid JSON, invalid transaction
 func TestCreateInvalidTransaction(t *testing.T) {
-	transactions = make([]Transaction, 0)
 	router := gin.Default()
 	router.POST("/transactions", createTransactions)
 
@@ -120,7 +118,6 @@ func TestCreateInvalidTransaction(t *testing.T) {
 
 // malformed JSON
 func TestCreateInvalidJSON(t *testing.T) {
-	transactions = make([]Transaction, 0)
 	router := gin.Default()
 	router.POST("/transactions", createTransactions)
 
@@ -139,8 +136,7 @@ func TestCreateInvalidJSON(t *testing.T) {
 
 // test storage
 func TestStoredTransaction(t *testing.T) {
-	transactions = make([]Transaction, 0)
-	transaction := Transaction{
+	transaction := transaction.Transaction{
 		TransactionID: "tx002",
 		UserID:        "user002",
 		Amount:        5000,

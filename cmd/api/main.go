@@ -1,23 +1,14 @@
 package main
 
 import (
+	"ledgr/internal/transaction"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 // store in slice
-var transactions []Transaction = make([]Transaction, 0)
-
-// creating struct
-type Transaction struct {
-	TransactionID string `json:"transaction_id"`
-	UserID        string `json:"user_id"`
-	Amount        int64  `json:"amt"`
-	Currency      string `json:"currency"`
-	IPAddress     string `json:"ip_address"`
-	TimeStamp     int64  `json:"timestamp"`
-}
+var transactions []transaction.Transaction = make([]transaction.Transaction, 0)
 
 // start the server
 func main() {
@@ -31,7 +22,7 @@ func main() {
 
 // retrieve json data and convert to struct
 func createTransactions(c *gin.Context) {
-	var transactionReq Transaction
+	var transactionReq transaction.Transaction
 
 	//unable to bind
 	if err := c.ShouldBindJSON(&transactionReq); err != nil {
@@ -60,7 +51,7 @@ func createTransactions(c *gin.Context) {
 }
 
 // store the transaction in slice
-func storeTransactions(transactionReq Transaction) {
+func storeTransactions(transactionReq transaction.Transaction) {
 	transactions = append(transactions, transactionReq)
 }
 
@@ -72,7 +63,7 @@ func getTransactions(c *gin.Context) {
 }
 
 // validate the transaction
-func validateTransactions(transactionReq Transaction) bool {
+func validateTransactions(transactionReq transaction.Transaction) bool {
 	if transactionReq.Amount <= 0 {
 		return false
 	} else if transactionReq.UserID == "" {
