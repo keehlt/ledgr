@@ -11,6 +11,7 @@ import (
 
 // test validateTransactions()
 func TestValidateTransactions(t *testing.T) {
+	transactions = make([]Transaction, 0)
 
 	tests := []struct {
 		name        string
@@ -81,6 +82,7 @@ func TestValidateTransactions(t *testing.T) {
 
 // valid json
 func TestCreateValidTransaction(t *testing.T) {
+	transactions = make([]Transaction, 0)
 	router := gin.Default()
 	router.POST("/transactions", createTransactions)
 
@@ -98,6 +100,7 @@ func TestCreateValidTransaction(t *testing.T) {
 
 // valid JSON, invalid transaction
 func TestCreateInvalidTransaction(t *testing.T) {
+	transactions = make([]Transaction, 0)
 	router := gin.Default()
 	router.POST("/transactions", createTransactions)
 
@@ -117,6 +120,7 @@ func TestCreateInvalidTransaction(t *testing.T) {
 
 // malformed JSON
 func TestCreateInvalidJSON(t *testing.T) {
+	transactions = make([]Transaction, 0)
 	router := gin.Default()
 	router.POST("/transactions", createTransactions)
 
@@ -130,5 +134,25 @@ func TestCreateInvalidJSON(t *testing.T) {
 
 	if response.Result().StatusCode != http.StatusBadRequest {
 		t.Errorf("expected status %d, got %d", http.StatusBadRequest, response.Result().StatusCode)
+	}
+}
+
+// test storage
+func TestStoredTransaction(t *testing.T) {
+	transactions = make([]Transaction, 0)
+	transaction := Transaction{
+		TransactionID: "tx002",
+		UserID:        "user002",
+		Amount:        5000,
+		Currency:      "INR",
+		IPAddress:     "127.0.0.2",
+		TimeStamp:     1756940333,
+	}
+
+	storeTransactions(transaction)
+	y := len(transactions)
+	st := transactions[y-1].TransactionID
+	if st != transaction.TransactionID {
+		t.Errorf("expected stored transaction ID %s, got %s", transaction.TransactionID, st)
 	}
 }
